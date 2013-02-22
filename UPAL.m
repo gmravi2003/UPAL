@@ -2,7 +2,6 @@
 % This code does unbiased pool based active learning.
 
 %% --- Step 1: Read train and test data-----
-display('Will call UPAL');
 wrkspcinitflag=exist('xtrn');
 if(~ wrkspcinitflag)
 
@@ -54,11 +53,18 @@ if(~ wrkspcinitflag)
     lossstr='logistic';
     stream1 = RandStream('mt19937ar','Seed',1);
     RandStream.setDefaultStream(stream1);
+else
+    numtrn=size(xtrn,2);
+    numtst=size(xtst,2);
+    numdims=size(xtrn,1);
+    options=optimset('Display','off','GradObj','on',...
+                     'LargeScale','off',); 
+    options.MaxFunEvals=1000;
+    options.MaxIter=500;
 end
+    
 
 %% ---- Step 2: Algorithm begins -----
-
-tic;
 
 % The importance weights on the points. For points that were not queried
 % these weights are simply 0.
@@ -229,14 +235,16 @@ while numpntsqrd < BUDGET
         EMPRISKACT=@(w) (1/(numtrn*t))*imp'*LOSS(w'*(xy))';
         
         ststc=norm(importance_weights);
-        decay_poolal=ststc/(numtrn*t*t);
+        %decay_poolal=ststc/(numtrn*t*t);
+        new_ststc=sum(importance_weights);
+        decay_poolal=1/new_ststc^(1/3);
         ACTOBJGRAD=@(w) deal(...
             EMPRISKACT(w)+(lambda_upal*decay_poolal/2)*norm(w,2)^2,... 
             lambda_upal*decay_poolal*w+...
             (1/(numtrn*t))*(xy*(LossGradient(w'*xy)'.*imp)));
         % Find out active learning vector.
         try                
-          w_al=fminunc(ACTOBJGRAD,w_al,options);
+          w_al=minFunc(ACTOBJGRAD,w_al,options);
         catch err
         end
 
@@ -263,6 +271,5 @@ while numpntsqrd < BUDGET
 end
 finaltsterract=tsterrupalqrs(end);
 finaltrnerrupal=trnerrupalqrs(end);
-display(['Number of rounds in PoolAL are ',num2str(t)]);
+%display(['Number of rounds in PoolAL are ',num2str(t)]);
 %% Code ends here..
-toc;
