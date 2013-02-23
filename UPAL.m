@@ -57,10 +57,11 @@ else
     numtrn=size(xtrn,2);
     numtst=size(xtst,2);
     numdims=size(xtrn,1);
+    %options.Display='off';
+    %options.MaxFunEvals=1000;
+    %options.MaxIter=500;
     options=optimset('Display','off','GradObj','on',...
-                     'LargeScale','off',); 
-    options.MaxFunEvals=1000;
-    options.MaxIter=500;
+                     'LargeScale','off','TolFun',10^-5);
 end
     
 
@@ -244,7 +245,7 @@ while numpntsqrd < BUDGET
             (1/(numtrn*t))*(xy*(LossGradient(w'*xy)'.*imp)));
         % Find out active learning vector.
         try                
-          w_al=minFunc(ACTOBJGRAD,w_al,options);
+            w_al=fminunc(ACTOBJGRAD,w_al,options);
         catch err
         end
 
