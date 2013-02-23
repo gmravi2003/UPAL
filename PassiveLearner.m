@@ -170,5 +170,5 @@ display('Cumulative test error over the entire BUDGET is...');
 display(cum_sum_tst_err);
 
 save(strcat(basepath,['matlab_codes/VC_UPAL/expt_results/mnist/' ...
-                  'upal_results.mat']));
+                    'passive_results.mat']));
 
