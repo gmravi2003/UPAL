@@ -1,69 +1,5 @@
 % Unbiased Pool based Active Learning (UPAL.)
-% This code does unbiased pool based active learning.
-
-%% --- Step 1: Read train and test data-----
-wrkspcinitflag=exist('xtrn');
-if(~ wrkspcinitflag)
-
-    N_TO_USE=1;
-    LASTN=maxNumCompThreads(N_TO_USE);
-
-    display('Training and test data NOT provided in PoolAL');
-    trnfile=...
-        '~/matlab_codes/iwal/abalone/abalone_train_0.txt';
-    tstfile=...
-        '~/matlab_codes/iwal/abalone/abalone_test_0.txt';
-
-    % The data is arranged column wise. Hence the data is d x n
-    % d= num of features, n=num of points.
-    
-    datatrn=dlmread(trnfile);
-    datatst=dlmread(tstfile);
-
-    
-    % Now remove the first row as these have the labels
-
-    ytrn=datatrn(1:1,:)';
-    ytst=datatst(1:1,:)';
-
-    xtrn=datatrn(2:end,:);
-    xtrn=xtrn*diag(1./sqrt(sum(xtrn.^2)));
-    xtst=datatst(2:end,:);
-
-    %%%% THIS IS ONLY FOR SCALABILITY%%%
-
-    SIZE=1200;
-    xtrn=xtrn(:,1:SIZE);
-    ytrn=ytrn(1:SIZE);
-    display(SIZE);
-    %%%%%%%%%%%%%%%%%%%% 
-
-    numtrn=size(xtrn,2);
-    numtst=size(xtst,2);
-    numdims=size(xtrn,1);
-    BUDGET=300;
-    explrexpupal=1/4;
-    strategy_upal='old';
-    display(BUDGET);   
-    % Create an optimization structure of options
-    options=optimset('Display','off','GradObj','on',...
-                'LargeScale','off','TolFun',10^-5);
-    
-    lambda_upal=0.001;
-    lossstr='logistic';
-    stream1 = RandStream('mt19937ar','Seed',1);
-    RandStream.setDefaultStream(stream1);
-else
-    numtrn=size(xtrn,2);
-    numtst=size(xtst,2);
-    numdims=size(xtrn,1);
-    %options.Display='off';
-    %options.MaxFunEvals=1000;
-    %options.MaxIter=500;
-    options=optimset('Display','off','GradObj','on',...
-                     'LargeScale','off','TolFun',10^-5);
-end
-    
+% This code does unbiased pool based active learning.    
 
 %% ---- Step 2: Algorithm begins -----
 
@@ -235,7 +171,7 @@ while numpntsqrd < BUDGET
         imp=importance_weights(queries_bool);
         EMPRISKACT=@(w) (1/(numtrn*t))*imp'*LOSS(w'*(xy))';
         
-        ststc=norm(importance_weights);
+        
         %decay_poolal=ststc/(numtrn*t*t);
         new_ststc=sum(importance_weights);
         decay_poolal=1/new_ststc^(1/3);
@@ -244,8 +180,11 @@ while numpntsqrd < BUDGET
             lambda_upal*decay_poolal*w+...
             (1/(numtrn*t))*(xy*(LossGradient(w'*xy)'.*imp)));
         % Find out active learning vector.
-        try                
-            w_al=fminunc(ACTOBJGRAD,w_al,options);
+        options.Display='off';
+        options.MaxFunEvals=1000;
+        options.MaxIter=500;
+        try
+            w_al=minFunc(ACTOBJGRAD,w_al,options);
         catch err
         end
 

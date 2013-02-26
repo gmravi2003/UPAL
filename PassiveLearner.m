@@ -10,11 +10,11 @@ else
     basepath='/net/hu17/gmravi/';
 end
 
-dirpath=strcat(basepath,'matlab_codes/iwal/mnist/');
-trn_data_file=strcat(dirpath,'mnist_train_data.txt');
-tst_data_file=strcat(dirpath,'mnist_test_data.txt');
-trn_labels_file=strcat(dirpath,'mnist_train_labels.txt');
-tst_labels_file=strcat(dirpath,'mnist_test_labels.txt');
+dirpath=strcat(basepath,'matlab_codes/iwal/abalone/');
+trn_data_file=strcat(dirpath,'abalone_train_data.txt');
+tst_data_file=strcat(dirpath,'abalone_test_data.txt');
+trn_labels_file=strcat(dirpath,'abalone_train_labels.txt');
+tst_labels_file=strcat(dirpath,'abalone_test_labels.txt');
 
 
 % The data is arranged column wise. Hence the data is d x n
@@ -162,13 +162,16 @@ end
 display('Test error at the end of budget is');
 display(tsterrpassqrs(end));
 
-display('Test error after looking at the entire data is ');
-display(finaltsterrpass);
 
 cum_tst_err=sum(tsterrpassqrs);
 display('Cumulative test error over the entire BUDGET is...');
-display(cum_sum_tst_err);
+display(cum_tst_err);
 
-save(strcat(basepath,['matlab_codes/VC_UPAL/expt_results/mnist/' ...
+display('Test error after looking at the entire data is ');
+display(finaltsterrpass);
+
+
+
+save(strcat(basepath,['matlab_codes/VC_UPAL/expt_results/abalone/' ...
                     'passive_results.mat']));
 
